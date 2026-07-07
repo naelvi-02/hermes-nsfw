@@ -1,0 +1,18 @@
+W1.5 Modal workers — code only
+
+Files:
+- modal/common.py (2571 B)
+- modal/worker_t2v.py (2015 B)
+- modal/worker_i2v.py (2496 B)
+
+Verification:
+- ls modal/ → 3 files
+- py_compile → exit 0
+- grep FEATURE_I2V_ENABLED|Supabase Storage|cleanup_old_outputs → all present
+
+Evidence:
+- All ≤50 LOC per fn, strict typing, no any
+- Supabase Storage (not R2)
+- I2V flag exact error string
+- cleanup cron every 6h
+- Pre-flight port 8000 documented in learnings.md (Oracle C2)

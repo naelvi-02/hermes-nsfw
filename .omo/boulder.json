@@ -1,0 +1,103 @@
+{
+  "schema_version": 2,
+  "active_work_id": "naelvi-build-f736cca4",
+  "works": {
+    "naelvi-build-f736cca4": {
+      "work_id": "naelvi-build-f736cca4",
+      "active_plan": "C:\\Users\\naufa\\Desktop\\hermes-nsfw\\.omo\\plans\\naelvi-build.md",
+      "plan_name": "naelvi-build",
+      "status": "active",
+      "started_at": "2026-07-07T08:12:00.895Z",
+      "updated_at": "2026-07-07T09:41:04.394Z",
+      "session_ids": [
+        "opencode:ses_0c5ce54e4ffeAvFHi7hLP3evWR"
+      ],
+      "session_origins": {
+        "opencode:ses_0c5ce54e4ffeAvFHi7hLP3evWR": "direct"
+      },
+      "agent": "atlas",
+      "task_sessions": {
+        "todo:1": {
+          "task_key": "todo:1",
+          "task_label": "1",
+          "task_title": "W1.1 — Supabase SQL migration (5 tables, 3 functions, 5 indexes)",
+          "session_id": "opencode:ses_0c45c7ae9ffeV0o7THwKvsgwTN",
+          "agent": "Sisyphus-Junior",
+          "category": "unspecified-high",
+          "updated_at": "2026-07-07T08:14:45.299Z",
+          "started_at": "2026-07-07T08:14:45.299Z",
+          "status": "running"
+        },
+        "todo:4": {
+          "task_key": "todo:4",
+          "task_label": "4",
+          "task_title": "W1.4 — OWNER: Modal account + Supabase Storage bucket + docs sync",
+          "session_id": "opencode:ses_0c41dff26ffeHUMhxTHSPVJH0n",
+          "agent": "Sisyphus-Junior",
+          "category": "quick",
+          "updated_at": "2026-07-07T09:28:28.577Z",
+          "started_at": "2026-07-07T09:28:28.577Z",
+          "status": "running"
+        },
+        "todo:5": {
+          "task_key": "todo:5",
+          "task_label": "5",
+          "task_title": "W1.5 — Modal video workers (worker_t2v.py, worker_i2v.py, common.py) deployed",
+          "session_id": "opencode:ses_0c4120804ffevyZFNoT2TnJiQR",
+          "agent": "Sisyphus-Junior",
+          "category": "quick",
+          "updated_at": "2026-07-07T09:41:04.395Z",
+          "started_at": "2026-07-07T09:41:04.395Z",
+          "status": "running"
+        }
+      }
+    }
+  },
+  "active_plan": "C:\\Users\\naufa\\Desktop\\hermes-nsfw\\.omo\\plans\\naelvi-build.md",
+  "started_at": "2026-07-07T08:12:00.895Z",
+  "status": "active",
+  "updated_at": "2026-07-07T09:41:04.394Z",
+  "session_ids": [
+    "opencode:ses_0c5ce54e4ffeAvFHi7hLP3evWR"
+  ],
+  "session_origins": {
+    "opencode:ses_0c5ce54e4ffeAvFHi7hLP3evWR": "direct"
+  },
+  "plan_name": "naelvi-build",
+  "task_sessions": {
+    "todo:1": {
+      "task_key": "todo:1",
+      "task_label": "1",
+      "task_title": "W1.1 — Supabase SQL migration (5 tables, 3 functions, 5 indexes)",
+      "session_id": "opencode:ses_0c45c7ae9ffeV0o7THwKvsgwTN",
+      "agent": "Sisyphus-Junior",
+      "category": "unspecified-high",
+      "updated_at": "2026-07-07T08:14:45.299Z",
+      "started_at": "2026-07-07T08:14:45.299Z",
+      "status": "running"
+    },
+    "todo:4": {
+      "task_key": "todo:4",
+      "task_label": "4",
+      "task_title": "W1.4 — OWNER: Modal account + Supabase Storage bucket + docs sync",
+      "session_id": "opencode:ses_0c41dff26ffeHUMhxTHSPVJH0n",
+      "agent": "Sisyphus-Junior",
+      "category": "quick",
+      "updated_at": "2026-07-07T09:28:28.577Z",
+      "started_at": "2026-07-07T09:28:28.577Z",
+      "status": "running"
+    },
+    "todo:5": {
+      "task_key": "todo:5",
+      "task_label": "5",
+      "task_title": "W1.5 — Modal video workers (worker_t2v.py, worker_i2v.py, common.py) deployed",
+      "session_id": "opencode:ses_0c4120804ffevyZFNoT2TnJiQR",
+      "agent": "Sisyphus-Junior",
+      "category": "quick",
+      "updated_at": "2026-07-07T09:41:04.395Z",
+      "started_at": "2026-07-07T09:41:04.395Z",
+      "status": "running"
+    }
+  },
+  "agent": "atlas"
+}

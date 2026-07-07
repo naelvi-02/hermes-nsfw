@@ -54,7 +54,7 @@
 - FPS: 8–12
 - Duration: ~2–3 seconds
 - Output: MP4 (H.264)
-- Storage: Cloudflare R2
+- Storage: Supabase Storage (bucket: `naelvi-videos`, public, 100MB limit, mp4 only)
 
 ---
 
@@ -139,7 +139,7 @@
 | VPS | Linode 8GB/4CPU | 172.232.232.65 |
 | Database | PostgreSQL 15.8 (Supabase) | VPS Docker |
 | GPU Compute | Modal L4 (24GB VRAM) | Modal Cloud |
-| Video Storage | Cloudflare R2 | Cloud |
+| Video Storage | Supabase Storage (bucket: naelvi-videos) | Cloud (Self-hosted) |
 | LLM API | OpenRouter | Cloud |
 | Image API | Novita AI | Cloud |
 | Payment API | Tripay | Cloud |

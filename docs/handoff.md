@@ -103,5 +103,5 @@ Tripay API Key         → daftar dulu
 Tripay Merchant Code   → daftar dulu
 Tripay Private Key     → daftar dulu
 Modal Token ID/Secret  → daftar modal.com
-R2 Access Key/Secret   → setup R2 bucket
+Supabase Storage bucket naelvi-videos   → ✅ DONE (W1.4 — created via SQL INSERT, public, 100MB, mp4 only)
 ```

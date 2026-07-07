@@ -93,7 +93,7 @@
 | Novita AI | `NOVITA_API_KEY` env di MCP | (stored in VPS env) |
 | Modal | Butuh daftar + token | $30 credit |
 | Tripay | **Belum daftar** | Butuh KTP + rekening |
-| Cloudflare R2 | **Belum setup** | Untuk video storage |
+| Supabase Storage | **Active** (bucket: naelvi-videos, public, 100MB, mp4 only) | Untuk video storage |
 
 ### 2.4 Model Configuration
 
@@ -655,7 +655,7 @@ async def generate_i2v(request):
     schedule=modal.Cron("0 */6 * * *")  # Every 6 hours
 )
 def cleanup_old_outputs():
-    """Delete output files older than 1 hour from R2."""
+    """Delete output files older than 1 hour from Supabase Storage naelvi-videos bucket."""
     ...
 ```
 
@@ -938,10 +938,9 @@ NOVITA_API_KEY=(stored in VPS env)
 
 MODAL_TOKEN_ID=
 MODAL_TOKEN_SECRET=
-R2_BUCKET=naelvi-videos
-R2_ENDPOINT=
-R2_ACCESS_KEY=
-R2_SECRET_KEY=
+SUPABASE_STORAGE_BUCKET=naelvi-videos
+SUPABASE_URL=http://172.232.232.65:8000
+SUPABASE_SERVICE_KEY=
 ```
 
 ---

@@ -202,7 +202,7 @@ Tambah ke Hermes Telegram platform config:
 - `@app.function(gpu="L4", timeout=300)`
 - AnimateDiff-Lightning 4-step, 24 frame, 512px
 - ffmpeg → MP4
-- Upload ke Supabase Storage atau R2
+- Upload ke Supabase Storage (bucket: naelvi-videos, public)
 - Callback ke VPS
 
 #### [NEW] `modal/worker_i2v.py`

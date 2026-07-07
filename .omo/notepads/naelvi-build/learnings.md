@@ -19,6 +19,17 @@
 - Supabase Kong port 8000 reachable from Modal cloud (Oracle C2 pre-flight in W1.5)
 - Pakasir publishes stable webhook sender IPs (Oracle C3 + W2.1 AC)
 
+## Session 2026-07-07 (late)
+**State:** Wave 1 W1.1-W1.3 ✅ complete (SQL migration, MCP gate tools, SOUL TIER RULES). W1.4-W1.6 [~] blocked (OWNER Modal setup + Storage/docs sync done but deploy gated). W1.7-W1.8 [~] blocked (depend on W1.6). Wave 2 all [~] (gated on Pakasir review ~3 hari). Final verification F1-F4 [~] (blocked on all W1/W2).
+
+**GitHub:** d65fc8a pushed (MCP recovery + video_client + docs sync R2→Supabase). All code + docs in repo current.
+
+**Blockers:** (1) OWNER Modal account + $30 + tokens + secrets (W1.4). (2) Pakasir account review pending (W2.0). (3) Schema/code mismatch video_jobs.type column (needs fix in _generate_video_modal INSERT). (4) Test data cleanup stale (user 777777777 retained 'ultra' from partial run).
+
+**Next session:** Continue after OWNER provides Modal credentials + Pakasir review complete. W1.6 INSERT fix (add `type` column + value) is low-effort first task.
+
+**Note:** User said "mark aja blocked, penting state terbaru ada di github, kita lanjut besok" — all checkboxes marked [~] where blocked, GitHub up-to-date, pause until tomorrow.
+
 ## 2026-07-07 Blocker recorded
 W1.1 marked `- [~]` (blocked). Reason: No SSH private key available in this environment to reach VPS `root@172.232.232.65`. Migration.sql file created locally (287 LOC) and committed, but live `docker exec psql` verification + evidence file cannot be produced. Task definition complete; deployment pending credential injection. Next task (W1.5 Modal workers code) is fully local and can proceed in parallel.
 

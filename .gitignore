@@ -1,6 +1,7 @@
 # Session / work state (never commit)
 .omo/boulder.json
 .omo/run-continuation/
+.omo/evidence/
 .tmp/
 
 # Python

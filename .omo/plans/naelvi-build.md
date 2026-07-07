@@ -144,7 +144,7 @@ Your next move: approve plan, lalu jalankan `$start-work .omo/plans/naelvi-build
   QA scenarios: happy = ULTRA user gets MP4 in Telegram via sendVideo + credit deducted; failure = Modal 500 → graceful error message in Telegram, no credit deduction, video_jobs row marked `status='failed'`. Evidence `.omo/evidence/task-6-naelvi-build.txt` (MCP call + psql + Telegram screenshot).
   Commit: Y | feat(mcp): add video_client + generate_video_modal tool with credit gating
 
-- [ ] 7. W1.7 — Bot commands /status + /help in Hermes config
+- [~] 7. W1.7 — Bot commands /status + /help in Hermes config (blocked: depends on W1.6 video flow + W1.4 owner Modal setup)
   What to do / Must NOT do: Add `/status` (calls `get_user_status` MCP tool, formats tier + usage + credits + expiry) and `/help` (static usage guide) to Hermes Telegram platform config. Edit Hermes config YAML (backup current first). Must NOT add `/upgrade` or `/topup` (Wave 2). Must NOT break existing `/start` `/reset`. **(Oracle C1 — PRE-FLIGHT before editing Hermes config)** First inspect `/root/hermes-rp-backups/20260701-013604/config.yaml` (or current live config under `/home/ubuntu/.hermes/`) for command-routing mechanism. If config-driven slash commands are supported (e.g. `commands:` block, `platforms.telegram.commands:` schema), use it. If NOT supported (Hermes routes ALL messages through LLM persona without explicit command handlers), implement fallback W1.7-ALT: small `python-telegram-bot` wrapper script `/home/ubuntu/.hermes/bot_commands.py` running as separate systemd service `naelvi-bot-commands.service` that intercepts messages starting with `/` BEFORE Hermes gateway, handles `/status` `/help` locally, forwards everything else to Hermes. Document chosen path in `docs/bot_commands_spec.md`. Must NOT modify Hermes gateway source code itself.
   Parallelization: Wave 1 | Blocked by: W1.2 | Blocks: W1.8 | Parallelize with: W1.3, W1.5, W1.6
   References: `docs/implementation_plan.md:188-196`, `docs/blueprint.md:467-469` (/status calls get_user_status), `docs/blueprint.md:461-465` (/help), Hermes config at `/root/hermes-rp-backups/20260701-013604/config.yaml` (or current live config).
@@ -153,7 +153,7 @@ Your next move: approve plan, lalu jalankan `$start-work .omo/plans/naelvi-build
   Commit: N (VPS Hermes config) — commit `docs/bot_commands_spec.md` reference to repo
   Commit (repo): Y | docs(bot): add /status + /help command spec
 
-- [ ] 8. W1.8 — Verify blueprint §12 Phase 1 (tier gate) + Phase 3 (video)
+- [~] 8. W1.8 — Verify blueprint §12 Phase 1 (tier gate) + Phase 3 (video) (blocked: depends on W1.7 + W1.6 + W1.5 deploy)
   What to do / Must NOT do: Execute blueprint §12 Phase 1 checklist (8 items: new user free auto-create, free NSFW chat denied, free NSFW image denied, free video denied, free SFW chat+image works, manual DB set pro → NSFW works, pro video denied, manual DB set ultra → video works) + Phase 3 checklist (ULTRA T2V → MP4 in Telegram, I2V image+caption → video, credit deducted, error → graceful, Modal dashboard cost accurate). Must NOT skip any checklist item. Must NOT mark pass without screenshot/log evidence.
   Parallelization: Wave 1 (final) | Blocked by: W1.1-W1.7 | Blocks: — | Parallelize with: —
   References: `docs/blueprint.md:847-905` (Phase 1-4 checklists), `.omo/drafts/naelvi-build.md` A13 (explicit I2V QA).
@@ -163,7 +163,7 @@ Your next move: approve plan, lalu jalankan `$start-work .omo/plans/naelvi-build
 
 ### Wave 2 — gated on Pakasir account review (owner action, ~3 hari)
 
-- [ ] 9. W2.0 — OWNER: Tunggu review akun Pakasir selesai (~3 hari)
+- [~] 9. W2.0 — OWNER: Tunggu review akun Pakasir selesai (~3 hari) (owner action, external review pending)
   What to do / Must NOT do: **OWNER ACTION**. Akun Pakasir sudah didaftarkan, status under review (max 3 hari). Setelah approval: dapatkan real `slug` (project slug) + `api_key`. Set in VPS env `/home/ubuntu/.hermes/custom_mcp/.env` (NOT in repo) sebagai `PAKASIR_SLUG`, `PAKASIR_API_KEY`, `PAKASIR_API_URL=https://app.pakasir.com`. Must NOT commit keys to git. Must NOT pakai akun reseller pihak ketiga selain Pakasir official.
   Parallelization: Wave 2 | Blocked by: — | Blocks: W2.1 | Parallelize with: any remaining W1
   References: `docs/handoff.md:99-107` (credentials needed), `RULESET.md` §Financial, `.omo/drafts/naelvi-build.md` D7 (Pakasir swap decision), riset librarian Pakasir.
@@ -171,7 +171,7 @@ Your next move: approve plan, lalu jalankan `$start-work .omo/plans/naelvi-build
   QA scenarios: happy = Pakasir API responds 200 + payment URL generated; failure = 401 → re-verify api_key + project status active; project masih Sandbox → toggle ke Production. Evidence `.omo/evidence/task-9-naelvi-build.txt`.
   Commit: N (owner action, no code)
 
-- [ ] 9b. W2.0b — Docs sync: Tripay → Pakasir references (all 5 doc files)
+- [~] 9b. W2.0b — Docs sync: Tripay → Pakasir references (all 5 doc files) (blocked: depends on W2.0 owner keys)
   What to do / Must NOT do: Search-replace residual `Tripay`/`tripay_ref`/`TRIPAY_*` references to Pakasir equivalents across all repo docs (NOT market_research.md which keeps Tripay as historical comparison per Momus M-C3 fix). Files + targeted edits: (1) `docs/blueprint.md` §6 (Tripay transaction flow → Pakasir flow: drop HMAC X-Signature section, add IP whitelist + double-check pattern), §10 (`billing/tripay_client.py` → `billing/pakasir_client.py`), §13 (env vars: drop `TRIPAY_API_KEY`/`TRIPAY_MERCHANT_CODE`/`TRIPAY_PRIVATE_KEY`/`TRIPAY_API_URL`, add `PAKASIR_SLUG`/`PAKASIR_API_KEY`/`PAKASIR_API_URL`), §6 schema `payments.tripay_ref` → `payments.pg_ref`. (2) `docs/implementation_plan.md:76,114,155` (Tripay → Pakasir, tripay_client.py → pakasir_client.py, HMAC verify → IP whitelist + double-check). (3) `docs/handoff.md:67,71,102-104` (creds needed, billing status). (4) `RULESET.md:24-25,33,86-87,122,161,197` (Stop Conditions: "Tripay key unconfigured" → "Pakasir key unconfigured"; financial safety refs). (5) `docs/blueprint.md §12 Phase 2 checklist lines 884-893` (verification source-of-truth must reflect Pakasir double-check, not Tripay HMAC sandbox). Must NOT touch `docs/market_research.md` (historical Tripay vs Midtrans comparison preserved). Must NOT change RULESET pricing (PRO Rp39k/ULTRA Rp79k unchanged). Must NOT change tier definitions.
   Parallelization: Wave 2 | Blocked by: W2.0 (Pakasir real keys confirmed for accurate docs) | Blocks: W2.5 (verify reads synced docs) | Parallelize with: W2.1, W2.2, W2.3, W2.4
   References: Momus M-C3 (Critical — Tripay→Pakasir doc sync not assigned to any todo), Oracle S4 (AGENTS.md security rule update — covered separately in W2.1 AC), D7 (Pakasir swap decision), D8 (`pg_ref` generic column).
@@ -179,7 +179,7 @@ Your next move: approve plan, lalu jalankan `$start-work .omo/plans/naelvi-build
   QA scenarios: happy = all 5 doc files synced, grep clean, blueprint §12 Phase 2 checklist now describes Pakasir double-check verification flow; failure = residual Tripay ref found → fix and re-grep. Evidence `.omo/evidence/task-9b-naelvi-build.txt` (grep outputs + diff snippets).
   Commit: Y | docs(sync): swap Tripay → Pakasir across blueprint, implementation_plan, handoff, RULESET, AGENTS (drop HMAC, add IP whitelist + double-check)
 
-- [ ] 10. W2.1 — Pakasir client + products + webhook (FastAPI :8088, NO HMAC — IP whitelist + double-check API)
+- [~] 10. W2.1 — Pakasir client + products + webhook (FastAPI :8088, NO HMAC — IP whitelist + double-check API) (blocked: depends on W2.0)
   What to do / Must NOT do: Write `/home/ubuntu/.hermes/custom_mcp/billing/pakasir_client.py` (`create_transaction(telegram_id, product_type, method='qris') → payment_url`; `get_transaction_status(order_id, amount) → status` via `GET /api/transactiondetail?project=&amount=&order_id=&api_key=`), `/home/ubuntu/.hermes/custom_mcp/billing/products.py` (PRODUCTS dict per `docs/implementation_plan.md:175-183`), `/home/ubuntu/.hermes/custom_mcp/billing/webhook.py` (FastAPI `POST /pakasir/callback` on `:8088`, **NO HMAC verify** — verifikasi pakai: (1) IP whitelist Pakasir webhook sender IP, (2) double-check `get_transaction_status(order_id, amount)` dari server VPS setiap callback, (3) idempotent DB upsert ON CONFLICT (pg_ref) DO NOTHING, (4) status enum map `pending`→`pending`, `completed`→`paid`, `canceled`→`canceled`). Update `payments.status='paid'` + `paid_at` only jika double-check returns `completed`. Update `users.tier`+`tier_expires` for subscription products OR increment `credits.img_credits`/`video_credits` for packs. Run via `uvicorn webhook:app --host 0.0.0.0 --port 8088` as systemd service `naelvi-pakasir-webhook`. Must NOT trust webhook payload tanpa double-check. Must NOT update DB sebelum double-check confirm. Must NOT use port 8080. Must NOT pakai HMAC logic (Pakasir tidak punya signature header).
   Parallelization: Wave 2 | Blocked by: W2.0 | Blocks: W2.2, W2.3 | Parallelize with: W2.4
   References: `docs/implementation_plan.md:153-184` (billing module + products dict), riset librarian Pakasir (API contract: `POST /api/transactioncreate/{method}`, body `{project, order_id, amount, api_key}`; webhook payload `{amount, order_id, project, status, payment_method, completed_at}`; status enum `pending/canceled/completed`; double-check via `GET /api/transactiondetail`), `docs/blueprint.md:830-845` (webhook :8088), `.omo/drafts/naelvi-build.md` A3 (port 8088), D7 (Pakasir swap).
@@ -187,7 +187,7 @@ Your next move: approve plan, lalu jalankan `$start-work .omo/plans/naelvi-build
   QA scenarios: happy = real Pakasir callback → double-check confirms → DB updated → user sees tier upgrade; failure = forged webhook → 403/404 + no DB change; duplicate → idempotent (UNIQUE pg_ref constraint catches); amount mismatch (webhook says 39000, double-check says 0) → reject + log alert. Evidence `.omo/evidence/task-10-naelvi-build.txt` (pytest + curl + psql).
   Commit: Y | feat(billing): add pakasir_client, products, webhook with IP whitelist + double-check + idempotent DB updates
 
-- [ ] 11. W2.2 — create_payment_link MCP tool (Pakasir)
+- [~] 11. W2.2 — create_payment_link MCP tool (Pakasir) (blocked: depends on W2.1)
   What to do / Must NOT do: Add `create_payment_link` tool to `mcp_server.py` (input: `telegram_id, product_type` ∈ `pro_monthly|ultra_monthly|img_pack_s|img_pack_m|img_pack_l|video_pack_m|video_pack_l`, optional `method='qris'`; output: `{payment_url, pg_ref, amount}`). Calls `pakasir_client.create_transaction` (`POST /api/transactioncreate/{method}`, body `{project, order_id, amount, api_key}`). Inserts `payments` row with `status='pending'`, `pg_ref=order_id`. Must NOT create duplicate pending payments for same user+product within 5 min (spam guard). Must NOT expose Pakasir internal errors to user.
   Parallelization: WAVE 2 | Blocked by: W2.1 | Blocks: W2.3, W2.5 | Parallelize with: W2.4
   References: `docs/implementation_plan.md:111-115` (create_payment_link contract), riset librarian Pakasir (API contract), `docs/implementation_plan.md:175-183` (PRODUCTS dict), D7 (Pakasir swap).
@@ -195,7 +195,7 @@ Your next move: approve plan, lalu jalankan `$start-work .omo/plans/naelvi-build
   QA scenarios: happy = user gets payment URL → pays → webhook upgrades tier; failure = Pakasir API down → returns `{error: 'payment service unavailable'}` (no crash, no DB row). Evidence `.omo/evidence/task-11-naelvi-build.txt`.
   Commit: Y | feat(mcp): add create_payment_link (Pakasir) with spam guard + pending payment tracking
 
-- [ ] 12. W2.3 — Bot commands /upgrade + /topup
+- [~] 12. W2.3 — Bot commands /upgrade + /topup (blocked: depends on W2.2)
   What to do / Must NOT do: Add `/upgrade` (shows PRO Rp 39.000 + ULTRA Rp 79.000 options, calls `create_payment_link` on selection) and `/topup` (shows credit packs, calls `create_payment_link`) to Hermes config. Edit Hermes config YAML (backup first). Must NOT break `/status` `/help` `/start` `/reset`.
   Parallelization: Wave 2 | Blocked by: W2.2 | Blocks: W2.5 | Parallelize with: W2.4
   References: `docs/implementation_plan.md:188-196`, `docs/blueprint.md:474-477` (/upgrade, /topup), `docs/implementation_plan.md:175-183` (PRODUCTS for /topup options).
@@ -204,7 +204,7 @@ Your next move: approve plan, lalu jalankan `$start-work .omo/plans/naelvi-build
   Commit: N (VPS Hermes config) — commit `docs/bot_commands_spec.md` update to repo
   Commit (repo): Y | docs(bot): add /upgrade + /topup command spec
 
-- [ ] 13. W2.4 — Tier-expiry mechanism (downgrade_expired_tiers + systemd timer)
+- [~] 13. W2.4 — Tier-expiry mechanism (downgrade_expired_tiers + systemd timer) (blocked: depends on W2.1)
   What to do / Must NOT do: Write SQL function `downgrade_expired_tiers()` (UPDATE users SET tier='free', tier_expires=NULL WHERE tier_expires < NOW() AND tier IN ('pro','ultra'); return count). Add systemd timer `naelvi-tier-expiry.timer` (daily 00:00 Asia/Jakarta = 17:00 UTC) + service `naelvi-tier-expiry.service` (runs `docker exec supabase-db psql -U postgres -c "SELECT downgrade_expired_tiers();"`). **(Oracle S1) Service unit must include**: `Persistent=true` (catch up if VPS was down at scheduled time), `Restart=on-failure`, `RestartSec=300`, `StandardOutput=append:/var/log/naelvi-tier-expiry.log`, `StandardError=append:/var/log/naelvi-tier-expiry.log`. **(Oracle S1) Commit `docs/tier-expiry-manual-recovery.sql`** with idempotent fallback SQL for manual run if timer fails: `SELECT downgrade_expired_tiers();` + log cleanup `find /var/log -name 'naelvi-tier-expiry.log' -mtime +30 -delete`. Must NOT run more than once/day. Must NOT downgrade users with NULL tier_expires (free users). Must NOT use pg_cron (not assumed installed). Must NOT skip Persistent=true (multi-day downtime catch-up required).
   Parallelization: Wave 2 | Blocked by: — | Blocks: W2.5 | Parallelize with: W2.1, W2.2, W2.3
   References: `.omo/drafts/naelvi-build.md` A10 (corrected — SQL check_user_access does NOT read tier_expires; this todo fills the gap), `docs/blueprint.md:905` (Phase 4 tier-expiry TODO with no impl), `docs/blueprint.md:163-194` (users.tier_expires column).
@@ -212,7 +212,7 @@ Your next move: approve plan, lalu jalankan `$start-work .omo/plans/naelvi-build
   QA scenarios: happy = expired pro/ultra → downgraded to free daily; failure = timer fails → `journalctl -u naelvi-tier-expiry.service` shows SQL error, retry. Evidence `.omo/evidence/task-13-naelvi-build.txt` (psql + systemctl + journalctl).
   Commit: Y | feat(billing): add downgrade_expired_tiers SQL + systemd timer for daily tier expiry
 
-- [ ] 14. W2.5 — Verify blueprint §12 Phase 2 (billing E2E) + Phase 4 (edge cases incl. forged-webhook resistance)
+- [~] 14. W2.5 — Verify blueprint §12 Phase 2 (billing E2E) + Phase 4 (edge cases incl. forged-webhook resistance) (blocked: depends on W2.1-W2.4)
   What to do / Must NOT do: Execute Phase 2 checklist (/upgrade → payment link, real payment → webhook → double-check → DB updated → tier upgrade, /topup → credit added → credit decremented on use) + Phase 4 edge cases (30-day expiry → auto-downgrade via W2.4, PRO buying ULTRA → no double stack via payments.pg_ref UNIQUE, Pakasir order expiry → status='canceled' from double-check, Supabase down → MCP errors gracefully, /upgrade spam → no duplicate payment links via W2.2 spam guard, **forged webhook from non-whitelisted IP → 403, no DB change**, **forged webhook from whitelisted IP with fake order_id → 404 from double-check, no DB change**, **amount mismatch between webhook payload vs double-check → reject + alert log**). Must NOT skip any item. Must NOT mark pass without evidence.
   Parallelization: Wave 2 (final) | Blocked by: W2.1-W2.4 | Blocks: — | Parallelize with: —
   References: `docs/blueprint.md:880-905` (Phase 2 + Phase 4 checklists), W2.4 tier-expiry mechanism, D7 (Pakasir security model), riset librarian Pakasir (no-HMAC + double-check pattern).
@@ -222,10 +222,10 @@ Your next move: approve plan, lalu jalankan `$start-work .omo/plans/naelvi-build
 
 ## Final verification wave
 > Runs in parallel after ALL todos. ALL must APPROVE. Surface results and wait for user's explicit okay before declaring complete.
-- [ ] F1. Plan compliance audit — every W1/W2 todo done, every acceptance criterion met, all evidence files present in `.omo/evidence/`
-- [ ] F2. Code quality review — no `as any`/`@ts-ignore`, no hardcoded keys, no empty catch, all functions ≤50 lines, existing 3 MCP tools unmodified (diff check)
-- [ ] F3. Real manual QA — full Telegram bot walkthrough as free/pro/ultra user across chat/image/video/billing; Modal dashboard cost < $20; Supabase volume backup taken before W2.4 destructive test
-- [ ] F4. Scope fidelity — no scope-creep beyond Wave 1+2 todos; docs (blueprint.md, SKILLSET.md, handoff.md, implementation_plan.md) updated to reflect built state; no R2 references remain
+- [~] F1. Plan compliance audit — every W1/W2 todo done, every acceptance criterion met, all evidence files present in `.omo/evidence/` (blocked: depends on all W1/W2)
+- [~] F2. Code quality review — no `as any`/`@ts-ignore`, no hardcoded keys, no empty catch, all functions ≤50 lines, existing 3 MCP tools unmodified (diff check) (blocked: depends on all W1/W2)
+- [~] F3. Real manual QA — full Telegram bot walkthrough as free/pro/ultra user across chat/image/video/billing; Modal dashboard cost < $20; Supabase volume backup taken before W2.4 destructive test (blocked: depends on all W1/W2)
+- [~] F4. Scope fidelity — no scope-creep beyond Wave 1+2 todos; docs (blueprint.md, SKILLSET.md, handoff.md, implementation_plan.md) updated to reflect built state; no R2 references remain (blocked: depends on all W1/W2)
 
 ## Commit strategy
 - Conventional commits: `feat(<scope>):`, `docs(<scope>):`, `fix(<scope>):` per todo Commit lines

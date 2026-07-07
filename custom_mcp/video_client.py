@@ -39,7 +39,7 @@ def generate_t2v(
 ) -> Dict[str, Any]:
     """
     Call Modal T2V worker via SDK.
-    Returns: {status, video_url, job_id} or {status:'unavailable'|'failed', reason, video_url:None}
+    Returns: {status, video_url, job_id} or {status: unavailable|failed, reason, video_url:None}
     """
     modal = _ensure_modal()
     if modal is None:
@@ -75,7 +75,7 @@ def generate_i2v(
 ) -> Dict[str, Any]:
     """
     Call Modal I2V worker via SDK.
-    If FEATURE_I2V_ENABLED=false on Modal side → returns {status:'unavailable', reason:'Image-to-video temporarily unavailable...', video_url:None}
+    If FEATURE_I2V_ENABLED=false on Modal side → returns {status:unavailable, reason:Image-to-video temporarily unavailable..., video_url:None}
     Otherwise same shape as T2V.
     """
     modal = _ensure_modal()

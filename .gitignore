@@ -1,0 +1,29 @@
+# Session / work state (never commit)
+.omo/boulder.json
+.omo/run-continuation/
+.tmp/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+.venv/
+venv/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# Secrets / env
+.env
+*.key
+*.pem
+secrets/
+
+# IDE
+.vscode/
+.idea/

@@ -34,7 +34,6 @@ image = (
 )
 
 MODEL_ID = "ByteDance/AnimateDiff-Lightning"
-FEATURE_I2V_ENABLED = os.environ.get("FEATURE_I2V_ENABLED", "false").lower() == "true"
 
 
 @app.function(
@@ -47,8 +46,13 @@ FEATURE_I2V_ENABLED = os.environ.get("FEATURE_I2V_ENABLED", "false").lower() == 
 @modal.web_endpoint(method="POST")
 def generate_i2v(request: dict[str, Any]) -> dict[str, Any]:
     """POST /generate-i2v — body: {prompt, image_url, steps=4, width=512, height=512, frames=24, chat_id}."""
-    if not FEATURE_I2V_ENABLED:
-        raise RuntimeError("I2V disabled by FEATURE_I2V_ENABLED=false")
+    if os.environ.get("FEATURE_I2V_ENABLED", "false").lower() != "true":
+        # Oracle S5 conformance: return structured error, no exception
+        return {
+            "status": "unavailable",
+            "reason": "Image-to-video temporarily unavailable. Please use text-to-video with /video.",
+            "video_url": None,
+        }
 
     prompt: str = request["prompt"]
     image_url: str = request["image_url"]

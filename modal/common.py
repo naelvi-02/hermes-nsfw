@@ -2,19 +2,21 @@
 
 from __future__ import annotations
 
+import datetime
 import os
 import subprocess
 import tempfile
 from typing import Any
 
 import modal
+import torch
 import numpy as np
 from PIL import Image
 from supabase import Client, create_client
 
 
 SUPABASE_URL = os.environ["SUPABASE_URL"]
-SUPABASE_KEY = os.environ["SUPABASE_SERVICE_ROLE_KEY"]
+SUPABASE_KEY = os.environ["SUPABASE_SERVICE_KEY"]
 BUCKET = "naelvi-videos"
 
 
@@ -81,6 +83,69 @@ def upload_to_supabase(local_path: str, object_name: str) -> str:
 def cleanup_old_outputs():
     """Cron: delete objects >24h old. Scheduled in worker files."""
     supa = get_supabase()
-    # Implementation: list + filter by created_at, remove batch
-    # (left as stub — full impl uses storage API pagination)
-    pass
+    cutoff = datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(hours=24)
+    to_delete: list[str] = []
+    limit = 1000
+    # list root prefixes (chat_id folders)
+    offset = 0
+    while True:
+        try:
+            items = supa.storage.from_(BUCKET).list(
+                path="",
+                options={"limit": limit, "offset": offset}
+            )
+        except Exception:
+            break
+        if not items:
+            break
+        for item in items:
+            name = item.get("name", "")
+            if not name:
+                continue
+            if name.endswith("/"):
+                prefix = name
+            else:
+                prefix = name + "/"
+            # list inside prefix
+            sub_offset = 0
+            while True:
+                try:
+                    sub_items = supa.storage.from_(BUCKET).list(
+                        path=prefix.rstrip("/"),
+                        options={"limit": limit, "offset": sub_offset}
+                    )
+                except Exception:
+                    break
+                if not sub_items:
+                    break
+                for sub in sub_items:
+                    sub_name = sub.get("name", "")
+                    if not sub_name or sub_name.endswith("/"):
+                        continue
+                    full_name = f"{prefix}{sub_name}" if prefix.endswith("/") else f"{prefix}/{sub_name}"
+                    created_str = (
+                        sub.get("created_at")
+                        or sub.get("updated_at")
+                        or sub.get("last_accessed_at")
+                    )
+                    if created_str:
+                        try:
+                            created = datetime.datetime.fromisoformat(
+                                created_str.replace("Z", "+00:00")
+                            )
+                            if created < cutoff:
+                                to_delete.append(full_name)
+                        except Exception:
+                            pass  # bad timestamp, skip
+                sub_offset += len(sub_items)
+                if len(sub_items) < limit:
+                    break
+        offset += len(items)
+        if len(items) < limit:
+            break
+    # delete per-object with try/except so one failure doesn't kill run
+    for obj_name in to_delete:
+        try:
+            supa.storage.from_(BUCKET).remove([obj_name])
+        except Exception:
+            pass  # continue cleanup

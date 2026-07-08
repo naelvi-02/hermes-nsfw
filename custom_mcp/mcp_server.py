@@ -1023,9 +1023,9 @@ async def _generate_video_modal(telegram_id: int, prompt: str, type: str, image_
     try:
         with conn.cursor() as cur:
             cur.execute(
-                "INSERT INTO video_jobs (id, telegram_id, status, created_at, updated_at) "
-                "VALUES (gen_random_uuid(), %s, 'pending', NOW(), NOW()) RETURNING id",
-                (telegram_id,),
+                "INSERT INTO video_jobs (id, telegram_id, type, prompt, input_image_url, status, created_at) "
+                "VALUES (gen_random_uuid(), %s, %s, %s, %s, 'pending', NOW()) RETURNING id",
+                (telegram_id, type, prompt, image_url),
             )
             row = cur.fetchone()
             job_id = str(row[0]) if row else None
@@ -1063,12 +1063,12 @@ async def _generate_video_modal(telegram_id: int, prompt: str, type: str, image_
         with conn.cursor() as cur:
             if status == "ok" and video_url:
                 cur.execute(
-                    "UPDATE video_jobs SET status = 'succeeded', output_url = %s, updated_at = NOW() WHERE id = %s",
+                    "UPDATE video_jobs SET status = 'succeeded', output_url = %s, completed_at = NOW() WHERE id = %s",
                     (video_url, job_id),
                 )
             else:
                 cur.execute(
-                    "UPDATE video_jobs SET status = %s, error = %s, updated_at = NOW() WHERE id = %s",
+                    "UPDATE video_jobs SET status = %s, error_message = %s, completed_at = NOW() WHERE id = %s",
                     (status, reason, job_id),
                 )
     finally:

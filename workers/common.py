@@ -1,4 +1,6 @@
-"""modal/common.py — shared helpers for video workers."""
+"""workers/common.py — shared helpers for video workers.
+All ML/supabase imports are lazy — resolved only inside Modal container at runtime.
+"""
 
 from __future__ import annotations
 
@@ -6,47 +8,63 @@ import datetime
 import os
 import subprocess
 import tempfile
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import modal
-import torch
-import numpy as np
-from PIL import Image
-from supabase import Client, create_client
 
+if TYPE_CHECKING:
+    from PIL import Image as PILImage
 
-SUPABASE_URL = os.environ["SUPABASE_URL"]
-SUPABASE_KEY = os.environ["SUPABASE_SERVICE_KEY"]
+SUPABASE_URL = os.environ.get("SUPABASE_URL", "")
+SUPABASE_KEY = os.environ.get("SUPABASE_SERVICE_KEY", "")
 BUCKET = "naelvi-videos"
 
 
-def get_supabase() -> Client:
+def get_supabase() -> Any:
     """Return authenticated Supabase client."""
+    from supabase import create_client  # type: ignore[import-untyped]
     return create_client(SUPABASE_URL, SUPABASE_KEY)
 
 
 def load_animatediff(model_id: str, device: str = "cuda") -> Any:
-    """Load AnimateDiff pipeline once per container."""
-    from diffusers import AnimateDiffPipeline, MotionAdapter
-    from diffusers import EulerDiscreteScheduler
+    """Load AnimateDiff-Lightning pipeline once per container (lazy imports inside Modal).
 
-    adapter = MotionAdapter.from_pretrained(
-        "guoyww/animatediff-motion-adapter-sdxl-beta",
-        torch_dtype=torch.float16,
-    )
+    ByteDance/AnimateDiff-Lightning is raw safetensors (no config.json), so we
+    must download the checkpoint and load_state_dict instead of from_pretrained.
+    """
+    import torch  # type: ignore[import-untyped]
+    from diffusers import AnimateDiffPipeline, MotionAdapter, EulerDiscreteScheduler  # type: ignore[import-untyped]
+    from huggingface_hub import hf_hub_download
+    from safetensors.torch import load_file
+
+    dtype = torch.float16
+    repo = "ByteDance/AnimateDiff-Lightning"
+    ckpt = "animatediff_lightning_4step_diffusers.safetensors"
+
+    adapter = MotionAdapter().to(device, dtype)
+    checkpoint_path = hf_hub_download(repo, ckpt)
+    adapter.load_state_dict(load_file(checkpoint_path, device=device))
+
     pipe = AnimateDiffPipeline.from_pretrained(
         model_id,
         motion_adapter=adapter,
-        torch_dtype=torch.float16,
+        torch_dtype=dtype,
     )
-    pipe.scheduler = EulerDiscreteScheduler.from_config(pipe.scheduler.config)
+    pipe.scheduler = EulerDiscreteScheduler.from_config(
+        pipe.scheduler.config,
+        timestep_spacing="trailing",
+        beta_schedule="linear",
+    )
     pipe = pipe.to(device)
     pipe.enable_vae_slicing()
+    pipe.enable_model_cpu_offload()
     return pipe
 
 
-def frames_to_mp4(frames: list[Image.Image], fps: int = 8) -> str:
+def frames_to_mp4(frames: list[Any], fps: int = 8) -> str:
     """Convert PIL frames → H.264 MP4 via ffmpeg pipe. Return path."""
+    import numpy as np  # type: ignore[import-untyped]
+
     with tempfile.NamedTemporaryFile(suffix=".mp4", delete=False) as tmp:
         output = tmp.name
 
@@ -80,13 +98,12 @@ def upload_to_supabase(local_path: str, object_name: str) -> str:
     return supa.storage.from_(BUCKET).get_public_url(object_name)
 
 
-def cleanup_old_outputs():
+def cleanup_old_outputs() -> None:
     """Cron: delete objects >24h old. Scheduled in worker files."""
     supa = get_supabase()
     cutoff = datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(hours=24)
     to_delete: list[str] = []
     limit = 1000
-    # list root prefixes (chat_id folders)
     offset = 0
     while True:
         try:
@@ -102,11 +119,7 @@ def cleanup_old_outputs():
             name = item.get("name", "")
             if not name:
                 continue
-            if name.endswith("/"):
-                prefix = name
-            else:
-                prefix = name + "/"
-            # list inside prefix
+            prefix = name if name.endswith("/") else name + "/"
             sub_offset = 0
             while True:
                 try:
@@ -136,16 +149,15 @@ def cleanup_old_outputs():
                             if created < cutoff:
                                 to_delete.append(full_name)
                         except Exception:
-                            pass  # bad timestamp, skip
+                            pass
                 sub_offset += len(sub_items)
                 if len(sub_items) < limit:
                     break
         offset += len(items)
         if len(items) < limit:
             break
-    # delete per-object with try/except so one failure doesn't kill run
     for obj_name in to_delete:
         try:
             supa.storage.from_(BUCKET).remove([obj_name])
         except Exception:
-            pass  # continue cleanup
+            pass
